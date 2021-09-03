@@ -1,31 +1,221 @@
-set base_path         /var/spool/apt-mirror
-set mirror_path       $base_path/mirror
-set skel_path         $base_path/skel
-set var_path          $base_path/var
-set postmirror_script $var_path/postmirror.sh
-set defaultarch       i386
+############# config ##################
+#
+# set base_path         /var/spool/apt-mirror
+#
+# set mirror_path       $base_path/mirror
+# set skel_path         $base_path/skel
+# set var_path          $base_path/var
+# set cleanscript       $var_path/clean.sh
+# set postmirror_script $var_path/postmirror.sh
+# set run_postmirror    0
+# set premirror_script  $var_path/premirror.sh
+# set run_premirror     0
+# set defaultarch       <running host architecture>
+# set defaultarch       amd64
+
+set base_path         /mnt/hdd/apt-test
+
+
+#-- Number concurrent wget instances
+# Make sure you have enough bandwidth space. Check also limit_rate
+# Default: 20
+set nthreads          128
+
+
+#== Options for URL sanitizing
+#==============================================
+#-- Convert tilde '~' into '%7E'  (without quote)
+# Default: 1
+set _tilde            1
+
+#-- Convert plus '+' into '%2B'  (without quote)
+# Default: 1
+set _plus             1
+#==============================================
+
+
+#== Running pre/post mirror script
+#==============================================
+#-- Executed before download process
+# Default: 1
+set run_premirror     0
+
+#-- Executed after download process
+# Default: 1
 set run_postmirror    0
-set nthreads          20
-set limit_rate        100m
-set _tilde            0
-# Use --unlink with wget (for use with hardlinked directories)
-set unlink            1
-set continue		  1
-set use_proxy         off
+#==============================================
+
+
+#-- Show only space needed, NO actual downloads executed except for the indexes
+# Default: 0
+set dry_run           0
+
+#--  Also download Contents.* files
+# Default: 1
+set _contents         1
+
+#-- Auto delete unused files
+# Default: 1
+set _autoclean        1
+
+
+
+#== Subroutines execution options
+#==============================================
+#-- Download translation files
+# Default: 1
+set exec_translation  1
+
+#-- Download Dep 11 files
+# Default: 1
+set exec_dep11        1
+
+#-- Download CNF files
+# Default: 0
+set exec_cnf          0
+
+#-- Download installer files (for remote boot)
+# Default: 0
+set exec_deb_ins      0
+
+#-- Download By_hash files
+# Default: 0
+set exec_by_hash      0
+
+#-- Download iso files
+# Default: 0
+set exec_deb_iso      1
+
+#-- Create and execute clean script
+# You may enable (set exec_clean 1) if you have limited storage space.
+# Old packages is useful for backup and maintenance
+# Default: 0
+set exec_clean        0
+#==============================================
+
+
+
+#== Do file sum checking, after/before download
+#==============================================
+#-- Executed before download process
+# Default: 1
+set pre_check_sum     1
+
+#-- Executed before download process
+# Default: 1
+set post_check_sum    1
+#==============================================
+
+
+#-- delete files with mismatch size or sum
+# Default: 1
+set delete_bad_file   1
+
+
+
+
+#-- WGET CONFIGS
+#-- these settings is control wget
+#------------------------------------------
+
+#-- disable SSL certificate checks
+# Default: 1
+set no_check_certificate 1
+
+#-- disable auth challenge
+# Default: 1
+set auth_no_challenge    1
+
+#-- proxy settings
+set use_proxy         1
 set http_proxy        127.0.0.1:3128
-set proxy_user        user
-set proxy_password    password
-set limit_rate		  100k
+# set proxy_user      auser
+# set proxy_password  apassword
 
-deb http://archive.ubuntu.com/ubuntu precise main restricted universe multiverse
-deb http://archive.ubuntu.com/ubuntu precise-security main restricted universe multiverse
-deb http://archive.ubuntu.com/ubuntu precise-updates main restricted universe multiverse
-deb http://archive.ubuntu.com/ubuntu precise-backports main restricted universe multiverse
+#-- mimic as other user agent
+# Default: Aptly/1.0
+set user_agent        Aptly/1.0
 
-#deb-src http://archive.ubuntu.com/ubuntu precise main restricted universe multiverse
-#deb-src http://archive.ubuntu.com/ubuntu precise-security main restricted universe multiverse
-#deb-src http://archive.ubuntu.com/ubuntu precise-updates main restricted universe multiverse
-#deb-src http://archive.ubuntu.com/ubuntu precise-backports main restricted universe multiverse
+#-- General network timeout, ie: read, connect and dns timeout
+# Default: 30
+set timeout           30
 
-clean http://archive.ubuntu.com/ubuntu
+#-- if download is failed, wget will retry with this number before give up
+# Default: 3
+set tries             3
 
+#-- if URL is redirected to another URL, wget will follow the new URL.
+# This number is maximum follow attempt
+# Default: 3
+set max_redirect      3
+
+#-- Some repository servers (most of them not) need to save cookies.
+# We need to save cookies between download sessions, to act as legitimate
+# and trustful repo client
+# Default: /tmp/apt-mirror.cookies
+set cookies_file      /tmp/apt-mirror.cookies
+
+#-- Make wget silent
+# Default: 1
+set no_verbose        1
+
+#-- Use --unlink with wget (for use with hardlinked directories)
+# Default: {no default value}
+set unlink            1
+
+#-- Use --continue with wget to continue getting partially-downloaded files
+# Default:            1
+set continue		  1
+
+#-- limit download rate per wget instances
+# Default: {no default value}
+set limit_rate        25m
+
+#-- using IPv6 only
+# if disabled (set ip_v6 0) wget will use to use only IPv4
+# Default: 0
+set ip_v6             0
+
+#
+############# end config ##############
+
+
+#deb-armhf http://security.debian.org/debian-security bullseye-security main
+#deb-arm64 http://security.debian.org/debian-security bullseye-security main
+#deb-amd64 http://security.debian.org/debian-security bullseye-security main
+#deb-i386  http://security.debian.org/debian-security bullseye-security main
+#deb-src   http://security.debian.org/debian-security bullseye-security main
+
+#deb-armhf http://cdn-fastly.deb.debian.org/debian bullseye-backports main contrib non-free
+#deb-arm64 http://cdn-fastly.deb.debian.org/debian bullseye-backports main contrib non-free
+#deb-amd64 http://cdn-fastly.deb.debian.org/debian bullseye-backports main contrib non-free
+#deb-i386  http://cdn-fastly.deb.debian.org/debian bullseye-backports main contrib non-free
+#deb-src   http://cdn-fastly.deb.debian.org/debian bullseye-backports main contrib non-free
+
+#deb-armhf http://archive.raspberrypi.org/debian buster main contrib non-free rpi firmware ui untested
+#deb-arm64 http://archive.raspberrypi.org/debian buster main contrib non-free rpi firmware ui untested
+#deb-src   http://archive.raspberrypi.org/debian buster main contrib non-free rpi firmware ui untested
+
+
+#deb-armhf http://cdn-fastly.deb.debian.org/debian bullseye main/debian-installer
+#deb-arm64 http://cdn-fastly.deb.debian.org/debian bullseye main/debian-installer
+#deb-amd64 http://cdn-fastly.deb.debian.org/debian bullseye main/debian-installer
+#deb-src   http://cdn-fastly.deb.debian.org/debian bullseye main/debian-installer
+
+iso https://cdimage.debian.org/cdimage/unofficial/non-free/cd-including-firmware/current/amd64/iso-cd/
+iso https://cdimage.debian.org/cdimage/unofficial/non-free/cd-including-firmware/current/i386/iso-cd/
+iso https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/
+iso https://cdimage.debian.org/debian-cd/current/arm64/iso-cd/
+iso https://cdimage.debian.org/debian-cd/current/armhf/iso-cd/
+iso https://cdimage.debian.org/debian-cd/current/i386/iso-cd/
+
+skip-clean https://cdimage.debian.org/cdimage
+skip-clean https://cdimage.debian.org/debian-cd
+
+clean http://security.debian.org/debian-security
+clean http://cdn-fastly.deb.debian.org/debian
+
+clean http://raspbian.raspberrypi.org/raspbian
+clean http://archive.raspberrypi.org/debian
+clean http://raspbian.raspberrypi.org/
+clean http://archive.raspberrypi.org/
